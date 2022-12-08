@@ -27,21 +27,18 @@ public class ObrasClient {
     @Value("${obras.url}")
     private String obrasURL;
 
-    public void callActualizarEstado() {
-        var actualizarEstado = obrasURL + "/actualizarEstado";
-
+    public void callActualizarEstado(Integer idRegistroExterno) {
+        var actualizarEstado = obrasURL + "/v1/solicitud/" + idRegistroExterno;
         var builder = UriComponentsBuilder.fromHttpUrl(actualizarEstado);
-        var object = new ArrayList<>();
-        var jsonObject = this.gson.toJson(object);
         var headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        var requestEntity = new HttpEntity<>(jsonObject, headers);
+        var requestEntity = new HttpEntity<>(headers);
 
         this.restTemplate.put(
                 UriUtils.decode(builder.toUriString(), StandardCharsets.UTF_8),
                 requestEntity,
-                Boolean.class
+                String.class
         );
     }
 }

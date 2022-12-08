@@ -2,6 +2,7 @@ package com.implementation.patterns.almacen.controllers;
 
 import com.implementation.patterns.almacen.components.model.tables.pojos.Solicitud;
 import com.implementation.patterns.almacen.model.GenerateRequestDto;
+import com.implementation.patterns.almacen.model.GenerateRequestResponseDto;
 import com.implementation.patterns.almacen.services.AlmacenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class AlmacenController {
     }
 
     @PostMapping("generateRequest")
-    public ResponseEntity<Integer> generateRequest(@RequestBody GenerateRequestDto generateRequestDto) {
+    public ResponseEntity<GenerateRequestResponseDto> generateRequest(@RequestBody GenerateRequestDto generateRequestDto) {
         Solicitud solicitud = new Solicitud();
 
         solicitud.setDescripcion("Detail for New Request : " + generateRequestDto.getId());
@@ -45,12 +46,13 @@ public class AlmacenController {
         solicitud.setIdRegistroExterno(generateRequestDto.getId());
         solicitud.setProcesoOrigen("EndPoint");
 
-        var result = almacenService.generarSolicitudAlmacen(solicitud);
+        var response = almacenService.generarSolicitudAlmacen(solicitud);
+        var result = GenerateRequestResponseDto.builder().id(response).build();
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @PutMapping("deliverOrder")
-    public ResponseEntity<Integer> deliverOrder(@RequestBody GenerateRequestDto generateRequestDto) {
+    public ResponseEntity<Boolean> deliverOrder(@RequestBody GenerateRequestDto generateRequestDto) {
         var deliverOrder = almacenService.deliverOrder(generateRequestDto.getId());
         return new ResponseEntity<>(deliverOrder, HttpStatus.OK);
     }

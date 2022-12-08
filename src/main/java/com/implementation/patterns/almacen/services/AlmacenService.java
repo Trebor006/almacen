@@ -21,8 +21,7 @@ public class AlmacenService {
 
 
     public Integer generarSolicitudAlmacen(Solicitud solicitud) {
-        var execute = context
-                .insertInto(Tables.SOLICITUD,
+        context.insertInto(Tables.SOLICITUD,
                         Tables.SOLICITUD.DESCRIPCION,
                         Tables.SOLICITUD.TITULO,
                         Tables.SOLICITUD.ESTADO,
@@ -36,17 +35,32 @@ public class AlmacenService {
                         solicitud.getIdRegistroExterno(),
                         solicitud.getProcesoOrigen())
                 .execute();
-        return execute;
+
+        Solicitud result = context.selectFrom(Tables.SOLICITUD)
+                .where(
+                        Tables.SOLICITUD.ID_REGISTRO_EXTERNO.eq(Integer.valueOf(solicitud.getIdRegistroExterno()))
+                )
+                .fetchSingle().into(Solicitud.class);
+
+        return result.getId();
     }
 
-    public Integer deliverOrder(Integer id) {
-        obrasClient.callActualizarEstado();
+    public Boolean deliverOrder(Integer id) {
+        Solicitud solicitud = context.selectFrom(Tables.SOLICITUD)
+                .where(
+                        Tables.SOLICITUD.ID.eq(Integer.valueOf(id))
+                )
+                .fetchSingle().into(Solicitud.class);
+
+        Integer idRegistroExterno = solicitud.getIdRegistroExterno();
+
+        obrasClient.callActualizarEstado(idRegistroExterno);
 
         var comprobanteDto = ComprobanteDtoRequest.builder()
                 .idRegistroExterno(id)
                 .build();
         contabilidadClient.callCreateComprobante(comprobanteDto);
-        return 0;
+        return Boolean.TRUE;
     }
 
     public List<Solicitud> findAll() {
